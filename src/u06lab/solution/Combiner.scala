@@ -12,13 +12,14 @@ trait Functions {
 }
 
 object FunctionsImpl extends Functions {
-  override def sum(a: List[Double]): Double = a.sum
+  override def sum(a: List[Double]): Double = combiner(a)
 
-  override def concat(a: Seq[String]): String = a.mkString
+  override def concat(a: Seq[String]): String = combiner(a)
 
-  override def max(a: List[Int]): Int = a.maxOption.getOrElse(Int.MinValue)
+  override def max(a: List[Int]): Int = combiner(a)
+
+  private def combiner[A: Combiner](seq: Iterable[A]): A = seq.fold(implicitly[Combiner[A]].unit)(implicitly[Combiner[A]].combine)
 }
-
 
 /*
   * 2) To apply DRY principle at the best,
@@ -36,6 +37,26 @@ object FunctionsImpl extends Functions {
 trait Combiner[A] {
   def unit: A
   def combine(a: A, b: A): A
+}
+
+object Combiner {
+  implicit val sumCombiner: Combiner[Double] = new Combiner[Double] {
+    override val unit: Double = 0
+
+    override def combine(a: Double, b: Double): Double = a + b
+  }
+
+  implicit val concatCombiner: Combiner[String] = new Combiner[String] {
+    override val unit: String = ""
+
+    override def combine(a: String, b: String): String = a + b
+  }
+
+  implicit val maxCombiner: Combiner[Int] = new Combiner[Int] {
+    override val unit: Int = Int.MinValue
+
+    override def combine(a: Int, b: Int): Int = Math.max(a, b)
+  }
 }
 
 object TryFunctions extends App {
