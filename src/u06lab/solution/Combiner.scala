@@ -18,7 +18,7 @@ object FunctionsImpl extends Functions {
 
   override def max(a: List[Int]): Int = combiner(a)
 
-  private def combiner[A: Combiner](seq: Iterable[A]): A = seq.fold(implicitly[Combiner[A]].unit)(implicitly[Combiner[A]].combine)
+  private def combiner[A: Combiner](a: Iterable[A]): A = a.fold(implicitly[Combiner[A]].unit)(implicitly[Combiner[A]].combine)
 }
 
 /*
